@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("BACKLOG") // BACKLOG, READY_FOR_CARTEIRO, READY_FOR_ZE, READY_FOR_WELLPROG, READY_FOR_OCMANAGER, IN_PROGRESS, REVIEW, APPROVED, DONE
+  priority    String?  // LOW, MEDIUM, HIGH, URGENT
+  assignee    String?
+  tags        String?  // JSON array of tags
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContentItem {
+  id            String   @id @default(cuid())
+  title         String
+  idea          String?
+  script        String?
+  thumbnail     String?
+  status        String   @default("IDEAS") // IDEAS, SCRIPT, THUMBNAIL, FILMING, PUBLISHED
+  platform      String?  // YOUTUBE, INSTAGRAM, TWITTER, etc.
+  scheduledDate DateTime?
+  publishedAt   DateTime?
+  tags          String?  // JSON array of tags
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  time        String?
+  type        String?  // MEETING, DEADLINE, REMINDER, CRON, etc.
+  agentId     String?
+  color       String?
+  recurring   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  agent       Agent?   @relation(fields: [agentId], references: [id], onDelete: SetNull)
+}
+
+model Memory {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  tags      String?  // JSON array of tags
+  source    String?  // Where the memory came from
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Agent {
+  id              String   @id @default(cuid())
+  name            String
+  role            String?
+  description     String?
+  status          String?  // ACTIVE, IDLE, OFFLINE
+  lastActive      DateTime?
+  specializations String?  // JSON array of specializations
+  events          Event[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
