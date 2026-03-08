@@ -5,6 +5,9 @@ import Sidebar from '@/components/Sidebar'
 export const metadata: Metadata = {
   title: 'Mission Control',
   description: 'Dashboard for task management, content pipeline, and team coordination',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({
