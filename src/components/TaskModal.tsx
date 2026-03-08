@@ -42,6 +42,14 @@ const priorityOptions = [
   { value: 'URGENT', label: 'Urgent' },
 ]
 
+const assigneeOptions = [
+  { value: '', label: 'No assignee' },
+  { value: 'Ze', label: 'Ze' },
+  { value: 'Carteiro', label: 'Carteiro' },
+  { value: 'wellProg', label: 'wellProg' },
+  { value: 'OCManager', label: 'OCManager' },
+]
+
 export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -188,13 +196,17 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
           <label className="block text-sm font-medium text-gray-300 mb-1">
             Assignee
           </label>
-          <input
-            type="text"
+          <select
             value={assignee}
             onChange={e => setAssignee(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-            placeholder="Enter assignee name"
-          />
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+          >
+            {assigneeOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
