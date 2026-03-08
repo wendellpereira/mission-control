@@ -66,6 +66,8 @@ model Agent {
   role            String?
   description     String?
   status          String?  // ACTIVE, IDLE, OFFLINE
+  currentTask     String?  // What the agent is currently working on
+  log             String?  // Activity log (newline-separated entries)
   lastActive      DateTime?
   specializations String?  // JSON array of specializations
   events          Event[]

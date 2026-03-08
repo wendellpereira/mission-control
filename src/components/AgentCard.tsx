@@ -1,6 +1,7 @@
 'use client'
 
-import { Activity, Clock, Star, Edit, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { Activity, Clock, Star, Edit, Trash2, ChevronDown, ChevronUp, Zap } from 'lucide-react'
 
 interface Agent {
   id: string
@@ -8,6 +9,8 @@ interface Agent {
   role: string | null
   description: string | null
   status: string | null
+  currentTask: string | null
+  log: string | null
   lastActive: Date | null
   specializations: string | null
   createdAt: Date
@@ -34,7 +37,9 @@ const agentAvatars: Record<string, string> = {
 }
 
 export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
+  const [showLog, setShowLog] = useState(false)
   const specializations = agent.specializations ? JSON.parse(agent.specializations) : []
+  const logEntries = agent.log ? agent.log.split('\n').filter(Boolean) : []
   
   return (
     <div className="bg-gray-800 rounded-lg p-5 border border-gray-700 group">
@@ -83,6 +88,17 @@ export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
             <p className="text-gray-400 text-xs mb-3">{agent.description}</p>
           )}
           
+          {/* Current Task */}
+          {agent.currentTask && (
+            <div className="mb-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded">
+              <div className="flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-xs text-blue-400 font-medium">Working on:</span>
+              </div>
+              <p className="text-white text-sm mt-1">{agent.currentTask}</p>
+            </div>
+          )}
+          
           {specializations.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
               {specializations.map((spec: string, i: number) => (
@@ -91,6 +107,29 @@ export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
                   {spec}
                 </span>
               ))}
+            </div>
+          )}
+          
+          {/* Activity Log */}
+          {logEntries.length > 0 && (
+            <div className="mb-3">
+              <button
+                onClick={() => setShowLog(!showLog)}
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+              >
+                {showLog ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                <span>Activity Log ({logEntries.length})</span>
+              </button>
+              
+              {showLog && (
+                <div className="mt-2 max-h-40 overflow-y-auto bg-gray-900/50 rounded p-2 text-xs text-gray-300 font-mono">
+                  {logEntries.map((entry, i) => (
+                    <div key={i} className="mb-1 last:mb-0">
+                      {entry}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           

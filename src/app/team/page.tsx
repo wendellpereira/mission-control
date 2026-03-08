@@ -11,6 +11,8 @@ interface Agent {
   role: string | null
   description: string | null
   status: string | null
+  currentTask: string | null
+  log: string | null
   lastActive: Date | null
   specializations: string | null
   createdAt: Date
