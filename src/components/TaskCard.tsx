@@ -66,10 +66,10 @@ export default function TaskCard({ task, index, onEdit, onDelete, onTrigger }: T
                     e.stopPropagation()
                     onTrigger(task)
                   }}
-                  className="p-1 hover:bg-yellow-900/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-1.5 bg-yellow-500/20 hover:bg-yellow-500/40 rounded transition-colors"
                   title={`Trigger ${task.assignee} to work on this task`}
                 >
-                  <Zap className="w-3.5 h-3.5 text-yellow-400" />
+                  <Zap className="w-4 h-4 text-yellow-400" />
                 </button>
               )}
               {onEdit && (
