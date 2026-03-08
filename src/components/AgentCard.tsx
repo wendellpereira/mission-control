@@ -36,6 +36,30 @@ const agentAvatars: Record<string, string> = {
   'OCManager': '🤖',
 }
 
+// Convert UTC timestamp in log entry to Central Time
+function formatLogEntry(entry: string): string {
+  // Match timestamp format: [2026-03-08T09:18:11.265Z]
+  const match = entry.match(/^\[([^\]]+)\]\s*(.*)$/)
+  if (!match) return entry
+  
+  const [, timestamp, message] = match
+  try {
+    const date = new Date(timestamp)
+    // Format in Central Time (America/Chicago)
+    const centralTime = date.toLocaleString('en-US', {
+      timeZone: 'America/Chicago',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
+    return `[${centralTime}] ${message}`
+  } catch {
+    return entry
+  }
+}
+
 export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
   const [showLog, setShowLog] = useState(false)
   const specializations = agent.specializations ? JSON.parse(agent.specializations) : []
@@ -125,7 +149,7 @@ export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
                 <div className="mt-2 max-h-40 overflow-y-auto bg-gray-900/50 rounded p-2 text-xs text-gray-300 font-mono">
                   {logEntries.map((entry, i) => (
                     <div key={i} className="mb-1 last:mb-0">
-                      {entry}
+                      {formatLogEntry(entry)}
                     </div>
                   ))}
                 </div>
@@ -136,7 +160,14 @@ export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
           {agent.lastActive && (
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <Clock className="w-3 h-3" />
-              <span>Last active: {new Date(agent.lastActive).toLocaleString()}</span>
+              <span>Last active: {new Date(agent.lastActive).toLocaleString('en-US', {
+                timeZone: 'America/Chicago',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              })}</span>
             </div>
           )}
         </div>
