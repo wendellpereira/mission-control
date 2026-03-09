@@ -125,105 +125,109 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
       isOpen={isOpen}
       onClose={onClose}
       title={task ? 'Edit Task' : 'New Task'}
+      wide
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Title *
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-              errors.title ? 'border-red-500' : 'border-gray-700'
-            }`}
-            placeholder="Enter task title"
-          />
-          {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-        </div>
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6">
+          {/* Left column: metadata fields */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Title *
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
+                  errors.title ? 'border-red-500' : 'border-gray-700'
+                }`}
+                placeholder="Enter task title"
+              />
+              {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Description
-          </label>
-          <textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
-            placeholder="Enter task description"
-          />
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Status
+              </label>
+              <select
+                value={status}
+                onChange={e => setStatus(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              >
+                {statusOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Status
-            </label>
-            <select
-              value={status}
-              onChange={e => setStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            >
-              {statusOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Priority
+              </label>
+              <select
+                value={priority}
+                onChange={e => setPriority(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              >
+                {priorityOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Assignee
+              </label>
+              <select
+                value={assignee}
+                onChange={e => setAssignee(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              >
+                {assigneeOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Tags
+              </label>
+              <input
+                type="text"
+                value={tags}
+                onChange={e => setTags(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                placeholder="tag1 tag2 tag3"
+              />
+              <p className="text-xs text-gray-500 mt-1">Space-separated values</p>
+            </div>
           </div>
 
-          <div>
+          {/* Right column: description — full height, easier to read/edit */}
+          <div className="flex flex-col mt-4 md:mt-0">
             <label className="block text-sm font-medium text-gray-300 mb-1">
-              Priority
+              Description
             </label>
-            <select
-              value={priority}
-              onChange={e => setPriority(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            >
-              {priorityOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="flex-1 w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none min-h-[240px]"
+              placeholder="Enter task description (markdown supported)"
+            />
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Assignee
-          </label>
-          <select
-            value={assignee}
-            onChange={e => setAssignee(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-          >
-            {assigneeOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Tags
-          </label>
-          <input
-            type="text"
-            value={tags}
-            onChange={e => setTags(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-            placeholder="tag1 tag2 tag3"
-          />
-          <p className="text-xs text-gray-500 mt-1">Space-separated values</p>
-        </div>
-
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex justify-end gap-3 pt-5 mt-4 border-t border-gray-800">
           <button
             type="button"
             onClick={onClose}

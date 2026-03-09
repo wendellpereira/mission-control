@@ -8,9 +8,10 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: React.ReactNode
+  wide?: boolean
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, wide }: ModalProps) {
   const handleEscape = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose()
   }, [onClose])
@@ -34,7 +35,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       onClick={onClose}
     >
       <div 
-        className="bg-gray-900 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto border border-gray-700 shadow-xl"
+        className={`bg-gray-900 rounded-lg w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-xl ${wide ? 'max-w-4xl' : 'max-w-lg'}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
