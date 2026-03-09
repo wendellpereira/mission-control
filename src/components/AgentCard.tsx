@@ -1,7 +1,7 @@
 'use client'
 
+import { Clock, Edit, Star, Trash2, Zap } from 'lucide-react'
 import { useState } from 'react'
-import { Activity, Clock, Star, Edit, Trash2, ChevronDown, ChevronUp, Zap } from 'lucide-react'
 
 interface Agent {
   id: string
@@ -61,7 +61,6 @@ function formatLogEntry(entry: string): string {
 }
 
 export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
-  const [showLog, setShowLog] = useState(false)
   const specializations = agent.specializations ? JSON.parse(agent.specializations) : []
   const logEntries = agent.log ? agent.log.split('\n').filter(Boolean) : []
   
@@ -137,24 +136,16 @@ export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
           {/* Activity Log */}
           {logEntries.length > 0 && (
             <div className="mb-3">
-              <button
-                onClick={() => setShowLog(!showLog)}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-300 transition-colors"
-              >
-                {showLog ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                <span>Activity Log ({logEntries.length})</span>
-              </button>
+              <div className='text-xs pt-5 pl-2'>Activity Log ({logEntries.length}):</div>
               
-              {showLog && (
-                <div className="mt-2 max-h-40 overflow-y-auto bg-gray-900/50 rounded p-2 text-xs text-gray-300 font-mono">
-                  {logEntries.map((entry, i) => (
-                    <div key={i} className="mb-1 last:mb-0">
-                      {formatLogEntry(entry)}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              <div className="mt-2 max-h-40 overflow-y-auto bg-gray-900/50 rounded p-2 text-xs text-gray-300 font-mono">
+                {logEntries.map((entry, i) => (
+                  <div key={i} className="mb-1 last:mb-0">
+                    {formatLogEntry(entry)}
+                  </div>
+                ))}
+              </div>
+            </div> 
           )}
           
           {agent.lastActive && (
