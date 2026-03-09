@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import TaskCard from '@/components/TaskCard'
 import TaskModal from '@/components/TaskModal'
-import { Plus } from 'lucide-react'
+import { Plus, Filter, X } from 'lucide-react'
 
 interface Task {
   id: string
@@ -30,11 +30,15 @@ const columns = [
   { id: 'DONE', title: 'Done', color: 'bg-emerald-600' },
 ]
 
+const agentOptions = ['Ze', 'Carteiro', 'wellProg', 'OCManager']
+
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [filterAgent, setFilterAgent] = useState<string>('')
+  const [filterTag, setFilterTag] = useState<string>('')
 
   useEffect(() => {
     fetchTasks()
@@ -52,10 +56,25 @@ export default function TasksPage() {
     }
   }
 
+  // Collect all unique tags across tasks
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>()
+    tasks.forEach(task => {
+      if (task.tags) {
+        try {
+          const parsed = JSON.parse(task.tags)
+          if (Array.isArray(parsed)) parsed.forEach(t => tagSet.add(t))
+        } catch {
+          // ignore
+        }
+      }
+    })
+    return Array.from(tagSet).sort()
+  }, [tasks])
+
   const handleSaveTask = async (taskData: Partial<Task>) => {
     try {
       if (taskData.id) {
-        // Update existing task
         const res = await fetch(`/api/tasks/${taskData.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -63,7 +82,6 @@ export default function TasksPage() {
         })
         if (!res.ok) throw new Error('Failed to update task')
       } else {
-        // Create new task
         const res = await fetch('/api/tasks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -98,7 +116,7 @@ export default function TasksPage() {
       'wellProg': 'wellprog',
       'OCManager': 'ocmanager',
     }
-    
+
     const agentId = task.assignee ? agentMap[task.assignee] : null
     if (!agentId) {
       alert('No agent assigned to this task')
@@ -106,22 +124,20 @@ export default function TasksPage() {
     }
 
     try {
-      // Update task status to IN_PROGRESS
       await fetch(`/api/tasks/${task.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'IN_PROGRESS' }),
       })
-      
-      // Trigger the agent
+
       const res = await fetch('/api/trigger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taskId: task.id, agentId }),
       })
-      
+
       if (!res.ok) throw new Error('Failed to trigger agent')
-      
+
       alert(`🚀 ${task.assignee} triggered! Check the agent's output.`)
       fetchTasks()
     } catch (error) {
@@ -154,11 +170,9 @@ export default function TasksPage() {
     const task = tasks.find(t => t.id === draggableId)
     if (!task) return
 
-    // Optimistic update
     const updatedTask = { ...task, status: destination.droppableId }
     setTasks(prev => prev.map(t => t.id === draggableId ? updatedTask : t))
 
-    // Update on server
     try {
       await fetch(`/api/tasks/${draggableId}`, {
         method: 'PATCH',
@@ -167,13 +181,31 @@ export default function TasksPage() {
       })
     } catch (error) {
       console.error('Failed to update task:', error)
-      // Revert on error
       fetchTasks()
     }
   }
 
-  const getTasksByColumn = (columnId: string) => 
-    tasks.filter(task => task.status === columnId)
+  const getTasksByColumn = (columnId: string) =>
+    tasks.filter(task => {
+      if (task.status !== columnId) return false
+      if (filterAgent && task.assignee !== filterAgent) return false
+      if (filterTag) {
+        try {
+          const parsed = JSON.parse(task.tags || '[]')
+          if (!Array.isArray(parsed) || !parsed.includes(filterTag)) return false
+        } catch {
+          return false
+        }
+      }
+      return true
+    })
+
+  const hasActiveFilters = filterAgent || filterTag
+
+  const clearFilters = () => {
+    setFilterAgent('')
+    setFilterTag('')
+  }
 
   if (loading) {
     return (
@@ -185,15 +217,64 @@ export default function TasksPage() {
 
   return (
     <div className="h-screen flex flex-col p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Tasks</h1>
-        <button 
-          onClick={openNewTaskModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Task
-        </button>
+      {/* Header: title left, controls centered, spacer right */}
+      <div className="flex items-center mb-6 gap-4">
+        <h1 className="text-2xl font-bold text-white w-24 shrink-0">Tasks</h1>
+
+        {/* Centered controls */}
+        <div className="flex-1 flex items-center justify-center gap-3 flex-wrap">
+          {/* New Task */}
+          <button
+            onClick={openNewTaskModal}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            New Task
+          </button>
+
+          {/* Filter by Agent */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-gray-400" />
+            <select
+              value={filterAgent}
+              onChange={e => setFilterAgent(e.target.value)}
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="">Filter by Agent</option>
+              {agentOptions.map(agent => (
+                <option key={agent} value={agent}>{agent}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filter by Tag */}
+          <div className="flex items-center gap-2">
+            <select
+              value={filterTag}
+              onChange={e => setFilterTag(e.target.value)}
+              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="">Filter by Tag</option>
+              {allTags.map(tag => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Clear filters */}
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1 px-3 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+            >
+              <X className="w-3 h-3" />
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Spacer to balance title */}
+        <div className="w-24 shrink-0" />
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -208,7 +289,7 @@ export default function TasksPage() {
                     {getTasksByColumn(column.id).length}
                   </span>
                 </div>
-                
+
                 <Droppable droppableId={column.id}>
                   {(provided, snapshot) => (
                     <div
@@ -219,10 +300,10 @@ export default function TasksPage() {
                       }`}
                     >
                       {getTasksByColumn(column.id).map((task, index) => (
-                        <TaskCard 
-                          key={task.id} 
-                          task={task} 
-                          index={index} 
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          index={index}
                           onEdit={openEditTaskModal}
                           onDelete={handleDeleteTask}
                           onTrigger={handleTriggerTask}
