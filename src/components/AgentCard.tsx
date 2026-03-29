@@ -63,9 +63,18 @@ function formatLogEntry(entry: string): string {
 export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
   const specializations = agent.specializations ? JSON.parse(agent.specializations) : []
   const logEntries = agent.log ? agent.log.split('\n').filter(Boolean) : []
+
+  const handleCardClick = () => {
+    if (onEdit) {
+      onEdit(agent)
+    }
+  }
   
   return (
-    <div className="bg-gray-800 rounded-lg p-5 border border-gray-700 group">
+    <div 
+      onClick={handleCardClick}
+      className="bg-gray-800 rounded-lg p-5 border border-gray-700 group cursor-pointer hover:bg-gray-750 hover:border-gray-600 transition-colors"
+    >
       <div className="flex items-start gap-4">
         <div className="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center text-2xl">
           {agentAvatars[agent.name] || '🤖'}
@@ -80,7 +89,10 @@ export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
             <div className="flex items-center gap-1">
               {onEdit && (
                 <button
-                  onClick={() => onEdit(agent)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEdit(agent)
+                  }}
                   className="p-1 hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                   title="Edit agent"
                 >
@@ -89,7 +101,8 @@ export default function AgentCard({ agent, onEdit, onDelete }: AgentCardProps) {
               )}
               {onDelete && (
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     if (window.confirm('Are you sure you want to delete this agent?')) {
                       onDelete(agent.id)
                     }

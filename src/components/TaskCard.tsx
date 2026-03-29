@@ -41,6 +41,12 @@ export default function TaskCard({ task, index, onEdit, onDelete, onTrigger }: T
   const tags = task.tags ? JSON.parse(task.tags) : []
   const canTrigger = task.status.startsWith('READY_FOR_') && task.assignee && agentMap[task.assignee]
 
+  const handleCardClick = () => {
+    if (onEdit) {
+      onEdit(task)
+    }
+  }
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -48,7 +54,8 @@ export default function TaskCard({ task, index, onEdit, onDelete, onTrigger }: T
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`bg-gray-800 rounded-lg p-4 mb-3 border border-gray-700 group ${
+          onClick={handleCardClick}
+          className={`bg-gray-800 rounded-lg p-4 mb-3 border border-gray-700 group cursor-pointer hover:bg-gray-750 hover:border-gray-600 transition-colors ${
             snapshot.isDragging ? 'shadow-lg shadow-blue-500/20' : ''
           }`}
         >

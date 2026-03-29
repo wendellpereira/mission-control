@@ -39,9 +39,18 @@ const platformIcons: Record<string, React.ReactNode> = {
 
 export default function ContentCard({ item, onEdit, onDelete }: ContentCardProps) {
   const tags = item.tags ? JSON.parse(item.tags) : []
+
+  const handleCardClick = () => {
+    if (onEdit) {
+      onEdit(item)
+    }
+  }
   
   return (
-    <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 min-w-[280px] max-w-[280px] group">
+    <div 
+      onClick={handleCardClick}
+      className="bg-gray-800 rounded-lg p-4 border border-gray-700 min-w-[280px] max-w-[280px] group cursor-pointer hover:bg-gray-750 hover:border-gray-600 transition-colors"
+    >
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-white font-medium text-sm flex-1">{item.title}</h3>
         <div className="flex items-center gap-1">
@@ -50,7 +59,10 @@ export default function ContentCard({ item, onEdit, onDelete }: ContentCardProps
           </span>
           {onEdit && (
             <button
-              onClick={() => onEdit(item)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(item)
+              }}
               className="p-1 hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity"
               title="Edit content"
             >
@@ -59,7 +71,8 @@ export default function ContentCard({ item, onEdit, onDelete }: ContentCardProps
           )}
           {onDelete && (
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 if (window.confirm('Are you sure you want to delete this content?')) {
                   onDelete(item.id)
                 }

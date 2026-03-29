@@ -20,9 +20,16 @@ interface MemoryCardProps {
 
 export default function MemoryCard({ memory, onEdit, onDelete }: MemoryCardProps) {
   const tags = memory.tags ? JSON.parse(memory.tags) : []
+
+  const handleCardClick = () => {
+    if (onEdit) {
+      onEdit(memory)
+    }
+  }
   
   return (
     <div 
+      onClick={handleCardClick}
       className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors group cursor-pointer"
     >
       <div className="flex items-start gap-3">
