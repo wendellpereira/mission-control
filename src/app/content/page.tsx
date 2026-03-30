@@ -13,8 +13,8 @@ interface ContentItem {
   thumbnail: string | null
   status: string
   platform: string | null
-  scheduledDate: Date | null
-  publishedAt: Date | null
+  scheduledDate: string | Date | null
+  publishedAt: string | Date | null
   tags: string | null
   createdAt: Date
   updatedAt: Date

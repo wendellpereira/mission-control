@@ -7,7 +7,7 @@ interface Event {
   id: string
   title: string
   description: string | null
-  date: Date
+  date: string | Date
   time: string | null
   type: string | null
   agentId: string | null
