@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import ContentCard from '@/components/ContentCard'
 import ContentModal from '@/components/ContentModal'
-import { Plus, ChevronRight } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 interface ContentItem {
   id: string
@@ -104,6 +105,30 @@ export default function ContentPage() {
     setEditingItem(null)
   }
 
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result
+
+    if (!destination) return
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return
+
+    const item = items.find(i => i.id === draggableId)
+    if (!item) return
+
+    const updatedItem = { ...item, status: destination.droppableId }
+    setItems(prev => prev.map(i => i.id === draggableId ? updatedItem : i))
+
+    try {
+      await fetch(`/api/content/${draggableId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: destination.droppableId }),
+      })
+    } catch (error) {
+      console.error('Failed to update content:', error)
+      fetchContent()
+    }
+  }
+
   const getItemsByStage = (stageId: string) =>
     items.filter(item => item.status === stageId)
 
@@ -119,7 +144,7 @@ export default function ContentPage() {
     <div className="h-screen flex flex-col p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">Content Pipeline</h1>
-        <button 
+        <button
           onClick={openNewContentModal}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
@@ -128,35 +153,43 @@ export default function ContentPage() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-x-auto">
-        <div className="flex gap-6 min-w-max h-full">
-          {stages.map((stage, index) => (
-            <div key={stage.id} className="flex items-start">
-              <div className="flex flex-col w-[300px]">
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="flex-1 overflow-x-auto">
+          <div className="flex gap-6 min-w-max h-full">
+            {stages.map(stage => (
+              <div key={stage.id} className="flex flex-col w-[300px]">
                 <div className={`border-b-2 ${stage.color} pb-2 mb-4`}>
                   <h2 className="text-lg font-semibold text-white">{stage.title}</h2>
                   <p className="text-xs text-gray-500">{getItemsByStage(stage.id).length} items</p>
                 </div>
-                
-                <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-200px)]">
-                  {getItemsByStage(stage.id).map(item => (
-                    <ContentCard 
-                      key={item.id} 
-                      item={item} 
-                      onEdit={openEditContentModal}
-                      onDelete={handleDeleteContent}
-                    />
-                  ))}
-                </div>
+
+                <Droppable droppableId={stage.id}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={`flex-1 p-2 rounded-lg transition-colors overflow-y-auto max-h-[calc(100vh-200px)] ${
+                        snapshot.isDraggingOver ? 'bg-gray-800/50' : ''
+                      }`}
+                    >
+                      {getItemsByStage(stage.id).map((item, index) => (
+                        <ContentCard
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          onEdit={openEditContentModal}
+                          onDelete={handleDeleteContent}
+                        />
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               </div>
-              
-              {index < stages.length - 1 && (
-                <ChevronRight className="w-5 h-5 text-gray-600 mt-8 mx-2" />
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </DragDropContext>
 
       <ContentModal
         isOpen={isModalOpen}

@@ -1,5 +1,6 @@
 'use client'
 
+import { Draggable } from '@hello-pangea/dnd'
 import { Calendar, Tag, Youtube, Instagram, Twitter, Edit, Trash2 } from 'lucide-react'
 
 interface ContentItem {
@@ -19,6 +20,7 @@ interface ContentItem {
 
 interface ContentCardProps {
   item: ContentItem
+  index: number
   onEdit?: (item: ContentItem) => void
   onDelete?: (itemId: string) => void
 }
@@ -37,7 +39,7 @@ const platformIcons: Record<string, React.ReactNode> = {
   TWITTER: <Twitter className="w-4 h-4" />,
 }
 
-export default function ContentCard({ item, onEdit, onDelete }: ContentCardProps) {
+export default function ContentCard({ item, index, onEdit, onDelete }: ContentCardProps) {
   const tags = item.tags ? JSON.parse(item.tags) : []
 
   const handleCardClick = () => {
@@ -45,12 +47,19 @@ export default function ContentCard({ item, onEdit, onDelete }: ContentCardProps
       onEdit(item)
     }
   }
-  
+
   return (
-    <div 
-      onClick={handleCardClick}
-      className="bg-gray-800 rounded-lg p-4 border border-gray-700 min-w-[280px] max-w-[280px] group cursor-pointer hover:bg-gray-750 hover:border-gray-600 transition-colors"
-    >
+    <Draggable draggableId={item.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          onClick={handleCardClick}
+          className={`bg-gray-800 rounded-lg p-4 border border-gray-700 min-w-[280px] max-w-[280px] group cursor-pointer hover:bg-gray-750 hover:border-gray-600 transition-colors ${
+            snapshot.isDragging ? 'shadow-lg shadow-blue-500/20' : ''
+          }`}
+        >
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-white font-medium text-sm flex-1">{item.title}</h3>
         <div className="flex items-center gap-1">
@@ -114,6 +123,8 @@ export default function ContentCard({ item, onEdit, onDelete }: ContentCardProps
           ))}
         </div>
       )}
-    </div>
+        </div>
+      )}
+    </Draggable>
   )
 }
