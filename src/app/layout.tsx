@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Sidebar from '@/components/Sidebar'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 export const metadata: Metadata = {
   title: 'Mission Control',
@@ -17,11 +18,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-950">
-        <Sidebar />
-        <main className="ml-16 min-h-screen">
-          {children}
-        </main>
+      <body>
+        <ThemeProvider>
+          <Sidebar />
+          <main className="ml-16 min-h-screen">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   )
