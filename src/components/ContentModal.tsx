@@ -151,6 +151,19 @@ export default function ContentModal({ isOpen, onClose, item, onSave }: ContentM
               {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Idea
+              </label>
+              <textarea
+                value={idea}
+                onChange={e => setIdea(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+                placeholder="Describe the content idea"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -241,31 +254,17 @@ export default function ContentModal({ isOpen, onClose, item, onSave }: ContentM
             </div>
           </div>
 
-          {/* Right column: Idea + Script — full height, easier to read/edit */}
-          <div className="flex flex-col gap-4 mt-4 md:mt-0">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Idea
-              </label>
-              <textarea
-                value={idea}
-                onChange={e => setIdea(e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
-                placeholder="Describe the content idea"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Script
-              </label>
-              <textarea
-                value={script}
-                onChange={e => setScript(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none min-h-[200px]"
-                placeholder="Enter the script or outline (markdown supported)"
-              />
-            </div>
+          {/* Right column: Script — full height, easier to read/edit */}
+          <div className="flex flex-col mt-4 md:mt-0">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Script
+            </label>
+            <textarea
+              value={script}
+              onChange={e => setScript(e.target.value)}
+              className="flex-1 w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none min-h-[320px]"
+              placeholder="Enter the script or outline (markdown supported)"
+            />
           </div>
         </div>
 

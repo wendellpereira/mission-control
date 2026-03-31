@@ -281,8 +281,8 @@ export default function TasksPage() {
         <div className="flex-1 overflow-x-auto">
           <div className="flex gap-4 h-full min-w-max">
             {columns.map(column => (
-              <div key={column.id} className="flex flex-col w-72">
-                <div className="flex items-center gap-2 mb-3 px-1">
+              <div key={column.id} className="flex flex-col w-72 h-full">
+                <div className="flex items-center gap-2 mb-3 px-1 shrink-0">
                   <span className={`w-3 h-3 rounded-full ${column.color}`} />
                   <h2 className="text-sm font-medium text-gray-300">{column.title}</h2>
                   <span className="text-xs text-gray-500">
@@ -295,7 +295,7 @@ export default function TasksPage() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`flex-1 p-2 rounded-lg transition-colors ${
+                      className={`flex-1 p-2 rounded-lg transition-colors overflow-y-auto min-h-0 ${
                         snapshot.isDraggingOver ? 'bg-gray-800/50' : 'bg-gray-900/50'
                       }`}
                     >

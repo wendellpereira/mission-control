@@ -56,7 +56,7 @@ export default function ContentCard({ item, index, onEdit, onDelete }: ContentCa
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={handleCardClick}
-          className={`bg-gray-800 rounded-lg p-4 border border-gray-700 min-w-[280px] max-w-[280px] group cursor-pointer hover:bg-gray-750 hover:border-gray-600 transition-colors ${
+          className={`bg-gray-800 rounded-lg p-4 border border-gray-700 min-w-[280px] max-w-[280px] mb-3 group cursor-pointer hover:bg-gray-750 hover:border-gray-600 transition-colors ${
             snapshot.isDragging ? 'shadow-lg shadow-blue-500/20' : ''
           }`}
         >
