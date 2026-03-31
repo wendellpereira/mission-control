@@ -129,140 +129,147 @@ export default function ContentModal({ isOpen, onClose, item, onSave }: ContentM
       isOpen={isOpen}
       onClose={onClose}
       title={item ? 'Edit Content' : 'New Content'}
+      wide
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Title *
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
-              errors.title ? 'border-red-500' : 'border-gray-700'
-            }`}
-            placeholder="Enter content title"
-          />
-          {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-        </div>
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-6">
+          {/* Left column: metadata fields */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Title *
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                className={`w-full px-3 py-2 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 ${
+                  errors.title ? 'border-red-500' : 'border-gray-700'
+                }`}
+                placeholder="Enter content title"
+              />
+              {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Idea
-          </label>
-          <textarea
-            value={idea}
-            onChange={e => setIdea(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
-            placeholder="Describe the content idea"
-          />
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Status
+                </label>
+                <select
+                  value={status}
+                  onChange={e => setStatus(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                >
+                  {statusOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Script
-          </label>
-          <textarea
-            value={script}
-            onChange={e => setScript(e.target.value)}
-            rows={4}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
-            placeholder="Enter the script or outline"
-          />
-        </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Platform
+                </label>
+                <select
+                  value={platform}
+                  onChange={e => setPlatform(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                >
+                  {platformOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Thumbnail URL
-          </label>
-          <input
-            type="text"
-            value={thumbnail}
-            onChange={e => setThumbnail(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-            placeholder="Enter thumbnail URL"
-          />
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Scheduled Date
+                </label>
+                <input
+                  type="date"
+                  value={scheduledDate}
+                  onChange={e => setScheduledDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Status
-            </label>
-            <select
-              value={status}
-              onChange={e => setStatus(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            >
-              {statusOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Published Date
+                </label>
+                <input
+                  type="date"
+                  value={publishedAt}
+                  onChange={e => setPublishedAt(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Thumbnail URL
+              </label>
+              <input
+                type="text"
+                value={thumbnail}
+                onChange={e => setThumbnail(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                placeholder="Enter thumbnail URL"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Tags
+              </label>
+              <input
+                type="text"
+                value={tags}
+                onChange={e => setTags(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                placeholder="tag1 tag2 tag3"
+              />
+              <p className="text-xs text-gray-500 mt-1">Space-separated values</p>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Platform
-            </label>
-            <select
-              value={platform}
-              onChange={e => setPlatform(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            >
-              {platformOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+          {/* Right column: Idea + Script — full height, easier to read/edit */}
+          <div className="flex flex-col gap-4 mt-4 md:mt-0">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Idea
+              </label>
+              <textarea
+                value={idea}
+                onChange={e => setIdea(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+                placeholder="Describe the content idea"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Script
+              </label>
+              <textarea
+                value={script}
+                onChange={e => setScript(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none min-h-[200px]"
+                placeholder="Enter the script or outline (markdown supported)"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Scheduled Date
-            </label>
-            <input
-              type="date"
-              value={scheduledDate}
-              onChange={e => setScheduledDate(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Published Date
-            </label>
-            <input
-              type="date"
-              value={publishedAt}
-              onChange={e => setPublishedAt(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Tags
-          </label>
-          <input
-            type="text"
-            value={tags}
-            onChange={e => setTags(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-            placeholder="tag1 tag2 tag3"
-          />
-          <p className="text-xs text-gray-500 mt-1">Space-separated values</p>
-        </div>
-
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex justify-end gap-3 pt-5 mt-4 border-t border-gray-800">
           <button
             type="button"
             onClick={onClose}
