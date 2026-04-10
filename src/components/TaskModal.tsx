@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
+import { Trash2 } from 'lucide-react'
 
 interface Task {
   id: string
@@ -20,6 +21,7 @@ interface TaskModalProps {
   onClose: () => void
   task?: Task | null
   onSave: (task: Partial<Task>) => void
+  onDelete?: (taskId: string) => void
 }
 
 const statusOptions = [
@@ -50,7 +52,7 @@ const assigneeOptions = [
   { value: 'OCManager', label: 'OCManager' },
 ]
 
-export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalProps) {
+export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: TaskModalProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState('BACKLOG')
@@ -227,20 +229,39 @@ export default function TaskModal({ isOpen, onClose, task, onSave }: TaskModalPr
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-5 mt-4 border-t border-gray-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            {task ? 'Save Changes' : 'Create Task'}
-          </button>
+        <div className="flex justify-between pt-5 mt-4 border-t border-gray-800">
+          <div>
+            {task && onDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this task?')) {
+                    onDelete(task.id)
+                    onClose()
+                  }
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Task
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {task ? 'Save Changes' : 'Create Task'}
+            </button>
+          </div>
         </div>
       </form>
     </Modal>

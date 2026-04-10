@@ -216,76 +216,112 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col p-6">
-      {/* Header: title left, controls centered, spacer right */}
-      <div className="flex items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-white w-24 shrink-0">Tasks</h1>
+    <div className="terminal h-screen">
+      <div className="terminal-header">
+        <div className="flex items-center justify-between w-full">
+          <h1 className="title is-5">TASKS<span className="has-terminal-cursor">_</span></h1>
 
-        {/* Centered controls */}
-        <div className="flex-1 flex items-center justify-center gap-3 flex-wrap">
           {/* New Task */}
-          <button
-            onClick={openNewTaskModal}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
+          <button onClick={openNewTaskModal} className="button is-primary">
             <Plus className="w-4 h-4" />
             New Task
           </button>
 
-          {/* Filter by Agent */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-400" />
-            <select
-              value={filterAgent}
-              onChange={e => setFilterAgent(e.target.value)}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
-            >
-              <option value="">Filter by Agent</option>
-              {agentOptions.map(agent => (
-                <option key={agent} value={agent}>{agent}</option>
-              ))}
-            </select>
-          </div>
+          <div className="flex items-center gap-3 flex-wrap mr-24">
 
-          {/* Filter by Tag */}
-          <div className="flex items-center gap-2">
-            <select
-              value={filterTag}
-              onChange={e => setFilterTag(e.target.value)}
-              className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
-            >
-              <option value="">Filter by Tag</option>
-              {allTags.map(tag => (
-                <option key={tag} value={tag}>{tag}</option>
-              ))}
-            </select>
-          </div>
+            {/* Filter by Agent */}
+            <div className="dropdown">
+              <div className="dropdown-trigger">
+                <div className="field" style={{ marginBottom: 0 }}>
+                  <div className="control">
+                    <div className="flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      <button className="button">
+                        {filterAgent || 'Agent'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="dropdown-menu">
+                <div className="dropdown-content">
+                  <button
+                    onClick={() => setFilterAgent('')}
+                    className={`dropdown-item w-full ${!filterAgent ? 'is-active' : ''}`}
+                  >
+                    All Agents
+                  </button>
+                  {agentOptions.map(agent => (
+                    <button
+                      key={agent}
+                      onClick={() => setFilterAgent(agent)}
+                      className={`dropdown-item w-full ${filterAgent === agent ? 'is-active' : ''}`}
+                    >
+                      {agent}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-          {/* Clear filters */}
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="flex items-center gap-1 px-3 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors text-sm"
-            >
-              <X className="w-3 h-3" />
-              Clear
-            </button>
-          )}
+            {/* Filter by Tag */}
+            <div className="dropdown">
+              <div className="dropdown-trigger">
+                <div className="field" style={{ marginBottom: 0 }}>
+                  <div className="control">
+                    <div className="flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      <button className="button w-full">
+                        {filterTag || 'Tag'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="dropdown-menu">
+                <div className="dropdown-content">
+                  <button
+                    onClick={() => setFilterTag('')}
+                    className={`dropdown-item w-full ${!filterTag ? 'is-active' : ''}`}
+                  >
+                    All Tags
+                  </button>
+                  {allTags.map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => setFilterTag(tag)}
+                      className={`dropdown-item w-full ${filterTag === tag ? 'is-active' : ''}`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Clear filters */}
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="button">
+                <X className="w-3 h-3" />
+                Clear
+              </button>
+            )}
+
+          </div>
         </div>
-
-        {/* Spacer to balance title */}
-        <div className="w-24 shrink-0" />
       </div>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 overflow-x-auto">
-          <div className="flex gap-4 h-full min-w-max">
+      <div className="terminal-body">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-4 h-full overflow-x-auto">
             {columns.map(column => (
               <div key={column.id} className="flex flex-col w-72 h-full">
                 <div className="flex items-center gap-2 mb-3 px-1 shrink-0">
                   <span className={`w-3 h-3 rounded-full ${column.color}`} />
-                  <h2 className="text-sm font-medium text-gray-300">{column.title}</h2>
-                  <span className="text-xs text-gray-500">
+                  <h2 className="text-sm font-medium">{column.title}</h2>
+                  <span className="text-xs has-text-muted">
                     {getTasksByColumn(column.id).length}
                   </span>
                 </div>
@@ -295,8 +331,8 @@ export default function TasksPage() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`flex-1 p-2 rounded-lg transition-colors overflow-y-auto min-h-0 ${
-                        snapshot.isDraggingOver ? 'bg-gray-800/50' : 'bg-gray-900/50'
+                      className={`flex-1 p-2 transition-colors overflow-y-auto min-h-0 ${
+                        snapshot.isDraggingOver ? 'has-background-dark' : ''
                       }`}
                     >
                       {getTasksByColumn(column.id).map((task, index) => (
@@ -305,7 +341,6 @@ export default function TasksPage() {
                           task={task}
                           index={index}
                           onEdit={openEditTaskModal}
-                          onDelete={handleDeleteTask}
                           onTrigger={handleTriggerTask}
                         />
                       ))}
@@ -316,14 +351,15 @@ export default function TasksPage() {
               </div>
             ))}
           </div>
-        </div>
-      </DragDropContext>
+        </DragDropContext>
+      </div>
 
       <TaskModal
         isOpen={isModalOpen}
         onClose={closeModal}
         task={editingTask}
         onSave={handleSaveTask}
+        onDelete={handleDeleteTask}
       />
     </div>
   )
