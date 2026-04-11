@@ -93,7 +93,7 @@ export default function MemoryPage() {
     setEditingMemory(null)
   }
 
-  const filteredMemories = memories.filter(memory => 
+  const filteredMemories = memories.filter(memory =>
     memory.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     memory.content.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -109,66 +109,66 @@ export default function MemoryPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Memory Bank</h1>
-        <button 
-          onClick={openNewMemoryModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Memory
-        </button>
+    <div className="terminal h-screen">
+      <div className="terminal-header">
+        <div className="flex items-center justify-between">
+          <h1 className="title is-5">MEMORY BANK<span className="has-terminal-cursor">_</span></h1>
+          <button onClick={openNewMemoryModal} className="button is-primary">
+            <Plus className="w-4 h-4" />
+            New Memory
+          </button>
+        </div>
       </div>
 
-      {/* Search and filters */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search memories..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-          />
+      <div className="terminal-body">
+        {/* Search and filters */}
+        <div className="field mb-6">
+          <div className="control">
+            <div className="flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search memories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input"
+              />
+            </div>
+          </div>
         </div>
-        
+
         {allTags.length > 0 && (
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-500" />
+          <div className="flex items-center gap-2 mb-4">
+            <Filter className="w-4 h-4" />
             <div className="flex flex-wrap gap-2">
               {allTags.slice(0, 5).map((tag, i) => (
-                <button
-                  key={i}
-                  className="px-3 py-1 text-xs bg-gray-800 text-gray-400 rounded-full hover:bg-gray-700 transition-colors"
-                >
+                <button key={i} className="tag">
                   {tag}
                 </button>
               ))}
             </div>
           </div>
         )}
-      </div>
 
-      {/* Memory grid */}
-      <div className="flex-1 overflow-y-auto">
-        {filteredMemories.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
-            <p>No memories found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredMemories.map(memory => (
-              <MemoryCard 
-                key={memory.id} 
-                memory={memory}
-                onEdit={openEditMemoryModal}
-                onDelete={handleDeleteMemory}
-              />
-            ))}
-          </div>
-        )}
+        {/* Memory grid */}
+        <div className="flex-1 overflow-y-auto">
+          {filteredMemories.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 has-text-muted">
+              <p>No memories found</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredMemories.map(memory => (
+                <MemoryCard
+                  key={memory.id}
+                  memory={memory}
+                  onEdit={openEditMemoryModal}
+                  onDelete={handleDeleteMemory}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <MemoryModal
