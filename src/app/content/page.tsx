@@ -141,26 +141,25 @@ export default function ContentPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Content Pipeline</h1>
-        <button
-          onClick={openNewContentModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Content
-        </button>
+    <div className="terminal h-screen">
+      <div className="terminal-header">
+        <div className="flex items-center justify-between">
+          <h1 className="title is-5">CONTENT PIPELINE<span className="has-terminal-cursor">_</span></h1>
+          <button onClick={openNewContentModal} className="button is-primary">
+            <Plus className="w-4 h-4" />
+            New Content
+          </button>
+        </div>
       </div>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 overflow-x-auto">
-          <div className="flex gap-6 min-w-max h-full">
+      <div className="terminal-body">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-6 h-full overflow-x-auto">
             {stages.map(stage => (
               <div key={stage.id} className="flex flex-col w-[300px]">
                 <div className={`border-b-2 ${stage.color} pb-2 mb-4`}>
-                  <h2 className="text-lg font-semibold text-white">{stage.title}</h2>
-                  <p className="text-xs text-gray-500">{getItemsByStage(stage.id).length} items</p>
+                  <h2 className="text-lg font-semibold">{stage.title}</h2>
+                  <p className="text-xs has-text-muted">{getItemsByStage(stage.id).length} items</p>
                 </div>
 
                 <Droppable droppableId={stage.id}>
@@ -168,8 +167,8 @@ export default function ContentPage() {
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className={`flex-1 p-2 rounded-lg transition-colors overflow-y-auto max-h-[calc(100vh-200px)] ${
-                        snapshot.isDraggingOver ? 'bg-gray-800/50' : ''
+                      className={`flex-1 p-2 transition-colors overflow-y-auto max-h-[calc(100vh-200px)] ${
+                        snapshot.isDraggingOver ? 'has-background-dark' : ''
                       }`}
                     >
                       {getItemsByStage(stage.id).map((item, index) => (
@@ -188,8 +187,8 @@ export default function ContentPage() {
               </div>
             ))}
           </div>
-        </div>
-      </DragDropContext>
+        </DragDropContext>
+      </div>
 
       <ContentModal
         isOpen={isModalOpen}

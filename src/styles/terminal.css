@@ -535,7 +535,6 @@ ol.content li::before {
 .card-header-title {
   font-weight: bold;
   color: var(--primary);
-  text-transform: uppercase;
   margin: 0;
 }
 
@@ -732,6 +731,26 @@ ol.content li::before {
   z-index: 1000;
   margin-top: 2px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Dropdown menu positioned above the trigger */
+.dropdown.is-dropup .dropdown-menu {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 2px;
+}
+
+/* Dropdown menu aligned to the right */
+.dropdown.is-right .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+/* Dropdown menu aligned to the left */
+.dropdown.is-left .dropdown-menu {
+  left: 0;
+  right: auto;
 }
 
 .dropdown.is-active .dropdown-menu,

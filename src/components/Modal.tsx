@@ -31,23 +31,24 @@ export default function Modal({ isOpen, onClose, title, children, wide }: ModalP
 
   return (
     <div 
-      className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 flex items-center justify-center p-4 z-50"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
       onClick={onClose}
     >
       <div 
-        className={`bg-gray-900 rounded-lg w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-xl ${wide ? 'max-w-4xl' : 'max-w-lg'}`}
+        className={`terminal ${wide ? 'max-w-4xl' : 'max-w-lg'} w-full max-h-[90vh] overflow-y-auto`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <div className="terminal-header">
+          <h2 className="title is-6">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-800 rounded transition-colors"
+            className="button"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="p-4">
+        <div className="terminal-body">
           {children}
         </div>
       </div>
