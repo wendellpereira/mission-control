@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
-// GET /api/agents - Get all agents
+const ZE_AGENT_NAME = 'Ze'
+
+// GET /api/agents - Get the single active OpenClaw agent
 export async function GET() {
   try {
     const agents = await prisma.agent.findMany({
+      where: { name: ZE_AGENT_NAME },
       orderBy: { name: 'asc' },
     })
     return NextResponse.json(agents)
@@ -13,13 +16,18 @@ export async function GET() {
   }
 }
 
-// POST /api/agents - Create a new agent
+// POST /api/agents - Create the single active OpenClaw agent
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+
+    if (body.name && String(body.name).toLowerCase() !== ZE_AGENT_NAME.toLowerCase()) {
+      return NextResponse.json({ error: 'Only Ze is supported as an active agent' }, { status: 400 })
+    }
+
     const agent = await prisma.agent.create({
       data: {
-        name: body.name,
+        name: ZE_AGENT_NAME,
         role: body.role,
         description: body.description,
         status: body.status || 'OFFLINE',
@@ -45,9 +53,13 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Agent name is required' }, { status: 400 })
     }
 
-    // Find the agent by name
+    if (String(name).toLowerCase() !== ZE_AGENT_NAME.toLowerCase()) {
+      return NextResponse.json({ error: 'Only Ze is supported as an active agent' }, { status: 404 })
+    }
+
+    // Find Ze by name
     const agent = await prisma.agent.findFirst({
-      where: { name },
+      where: { name: ZE_AGENT_NAME },
     })
 
     if (!agent) {

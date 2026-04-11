@@ -1,17 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: { unoptimized: true },
-  // Bypass browser caching to prevent chunk 400 errors during dev
-  // This forces chunks to be re-fetched when content changes
-  webpack: (config) => {
-    config.cache = {
-      type: 'filesystem',
-      buildDependencies: {
-        config: [__filename],
-      },
-    }
-    return config
-  },
-}
+const { PHASE_DEVELOPMENT_SERVER } = require('next/constants')
 
-module.exports = nextConfig
+/** @type {import('next').NextConfig} */
+module.exports = (phase) => ({
+  images: { unoptimized: true },
+  distDir: phase === PHASE_DEVELOPMENT_SERVER ? '.next' : '.next-build',
+})

@@ -11,9 +11,8 @@ model Task {
   id          String   @id @default(cuid())
   title       String
   description String?
-  status      String   @default("BACKLOG") // BACKLOG, READY_FOR_CARTEIRO, READY_FOR_ZE, READY_FOR_WELLPROG, READY_FOR_OCMANAGER, IN_PROGRESS, REVIEW, APPROVED, DONE
+  status      String   @default("BACKLOG") // BACKLOG, READY_FOR_ZE, IN_PROGRESS, REVIEW, APPROVED, DONE
   priority    String?  // LOW, MEDIUM, HIGH, URGENT
-  assignee    String?
   tags        String?  // JSON array of tags
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

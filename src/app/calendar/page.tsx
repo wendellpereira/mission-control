@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import EventCard from '@/components/EventCard'
 import EventModal from '@/components/EventModal'
-import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit, Trash2 } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react'
 
 interface Event {
   id: string
@@ -19,18 +18,12 @@ interface Event {
   updatedAt: Date
 }
 
-interface Agent {
-  id: string
-  name: string
-}
-
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 
                 'July', 'August', 'September', 'October', 'November', 'December']
 
 export default function CalendarPage() {
   const [events, setEvents] = useState<Event[]>([])
-  const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -39,7 +32,6 @@ export default function CalendarPage() {
 
   useEffect(() => {
     fetchEvents()
-    fetchAgents()
   }, [])
 
   const fetchEvents = async () => {
@@ -51,16 +43,6 @@ export default function CalendarPage() {
       console.error('Failed to fetch events:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchAgents = async () => {
-    try {
-      const res = await fetch('/api/agents')
-      const data = await res.json()
-      setAgents(data)
-    } catch (error) {
-      console.error('Failed to fetch agents:', error)
     }
   }
 
@@ -295,7 +277,6 @@ export default function CalendarPage() {
         isOpen={isModalOpen}
         onClose={closeModal}
         event={editingEvent}
-        agents={agents}
         initialDate={selectedDate || undefined}
         onSave={handleSaveEvent}
       />

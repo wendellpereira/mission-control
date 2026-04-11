@@ -5,40 +5,25 @@ import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
 import TaskCard from '@/components/TaskCard'
 import TaskModal from '@/components/TaskModal'
 import { Plus, Filter, X } from 'lucide-react'
-
-interface Task {
-  id: string
-  title: string
-  description: string | null
-  status: string
-  priority: string | null
-  assignee: string | null
-  tags: string | null
-  createdAt: Date
-  updatedAt: Date
-}
+import { collectTaskTags, getTasksResponseError, parseTasksResponse, taskHasTag, type Task } from '@/lib/tasks'
 
 const columns = [
   { id: 'BACKLOG', title: 'Backlog', color: 'bg-gray-600' },
-  { id: 'READY_FOR_CARTEIRO', title: 'Carteiro', color: 'bg-blue-600' },
-  { id: 'READY_FOR_ZE', title: 'Ze', color: 'bg-purple-600' },
-  { id: 'READY_FOR_WELLPROG', title: 'wellProg', color: 'bg-cyan-600' },
-  { id: 'READY_FOR_OCMANAGER', title: 'OCManager', color: 'bg-yellow-600' },
+  { id: 'READY_FOR_ZE', title: 'Ready for Ze', color: 'bg-purple-600' },
   { id: 'IN_PROGRESS', title: 'In Progress', color: 'bg-orange-600' },
   { id: 'REVIEW', title: 'Review', color: 'bg-pink-600' },
   { id: 'APPROVED', title: 'Approved', color: 'bg-green-600' },
   { id: 'DONE', title: 'Done', color: 'bg-emerald-600' },
 ]
 
-const agentOptions = ['Ze', 'Carteiro', 'wellProg', 'OCManager']
-
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [filterAgent, setFilterAgent] = useState<string>('')
   const [filterTag, setFilterTag] = useState<string>('')
+  const [isTagFilterOpen, setIsTagFilterOpen] = useState(false)
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
     fetchTasks()
@@ -46,11 +31,17 @@ export default function TasksPage() {
 
   const fetchTasks = async () => {
     try {
+      setLoadError('')
       const res = await fetch('/api/tasks')
       const data = await res.json()
-      setTasks(data)
+      if (!res.ok || !Array.isArray(data)) {
+        throw new Error(getTasksResponseError(data, res.status))
+      }
+      setTasks(parseTasksResponse(data))
     } catch (error) {
       console.error('Failed to fetch tasks:', error)
+      setTasks([])
+      setLoadError(error instanceof Error ? error.message : 'Failed to fetch tasks')
     } finally {
       setLoading(false)
     }
@@ -58,18 +49,7 @@ export default function TasksPage() {
 
   // Collect all unique tags across tasks
   const allTags = useMemo(() => {
-    const tagSet = new Set<string>()
-    tasks.forEach(task => {
-      if (task.tags) {
-        try {
-          const parsed = JSON.parse(task.tags)
-          if (Array.isArray(parsed)) parsed.forEach(t => tagSet.add(t))
-        } catch {
-          // ignore
-        }
-      }
-    })
-    return Array.from(tagSet).sort()
+    return collectTaskTags(tasks)
   }, [tasks])
 
   const handleSaveTask = async (taskData: Partial<Task>) => {
@@ -110,35 +90,16 @@ export default function TasksPage() {
   }
 
   const handleTriggerTask = async (task: Task) => {
-    const agentMap: Record<string, string> = {
-      'Ze': 'ze',
-      'Carteiro': 'carteiro',
-      'wellProg': 'wellprog',
-      'OCManager': 'ocmanager',
-    }
-
-    const agentId = task.assignee ? agentMap[task.assignee] : null
-    if (!agentId) {
-      alert('No agent assigned to this task')
-      return
-    }
-
     try {
-      await fetch(`/api/tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'IN_PROGRESS' }),
-      })
-
       const res = await fetch('/api/trigger', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId: task.id, agentId }),
+        body: JSON.stringify({ taskId: task.id }),
       })
 
       if (!res.ok) throw new Error('Failed to trigger agent')
 
-      alert(`🚀 ${task.assignee} triggered! Check the agent's output.`)
+      alert("Ze triggered. Check the agent's output.")
       fetchTasks()
     } catch (error) {
       console.error('Failed to trigger agent:', error)
@@ -188,23 +149,15 @@ export default function TasksPage() {
   const getTasksByColumn = (columnId: string) =>
     tasks.filter(task => {
       if (task.status !== columnId) return false
-      if (filterAgent && task.assignee !== filterAgent) return false
-      if (filterTag) {
-        try {
-          const parsed = JSON.parse(task.tags || '[]')
-          if (!Array.isArray(parsed) || !parsed.includes(filterTag)) return false
-        } catch {
-          return false
-        }
-      }
+      if (filterTag && !taskHasTag(task, filterTag)) return false
       return true
     })
 
-  const hasActiveFilters = filterAgent || filterTag
+  const hasActiveFilters = filterTag
 
   const clearFilters = () => {
-    setFilterAgent('')
     setFilterTag('')
+    setIsTagFilterOpen(false)
   }
 
   if (loading) {
@@ -216,143 +169,132 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="terminal h-screen">
-      <div className="terminal-header">
-        <div className="flex items-center justify-between w-full">
-          <h1 className="title is-5">TASKS<span className="has-terminal-cursor">_</span></h1>
+    <div className="h-screen flex flex-col p-6">
+      <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-2xl font-bold text-white">Tasks</h1>
 
-          {/* New Task */}
-          <button onClick={openNewTaskModal} className="button is-primary">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={openNewTaskModal}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
             <Plus className="w-4 h-4" />
             New Task
           </button>
 
-          <div className="flex items-center gap-3 flex-wrap mr-24">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsTagFilterOpen(open => !open)}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-800 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors min-w-[120px]"
+              aria-expanded={isTagFilterOpen}
+              aria-haspopup="menu"
+            >
+              <Filter className="w-4 h-4" />
+              {filterTag || 'Tag'}
+            </button>
 
-            {/* Filter by Agent */}
-            <div className="dropdown">
-              <div className="dropdown-trigger">
-                <div className="field" style={{ marginBottom: 0 }}>
-                  <div className="control">
-                    <div className="flex items-center gap-2">
-                      <Filter className="w-4 h-4" />
-                      <button className="button">
-                        {filterAgent || 'Agent'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="dropdown-menu">
-                <div className="dropdown-content">
-                  <button
-                    onClick={() => setFilterAgent('')}
-                    className={`dropdown-item w-full ${!filterAgent ? 'is-active' : ''}`}
-                  >
-                    All Agents
-                  </button>
-                  {agentOptions.map(agent => (
+            {isTagFilterOpen && (
+              <div
+                className="absolute right-0 top-full z-50 mt-2 min-w-[180px] overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-xl"
+                role="menu"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterTag('')
+                    setIsTagFilterOpen(false)
+                  }}
+                  className={`block w-full px-3 py-2 text-left text-sm transition-colors ${
+                    !filterTag ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+                  }`}
+                  role="menuitem"
+                >
+                  All Tags
+                </button>
+                {allTags.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-gray-500">No tags</div>
+                ) : (
+                  allTags.map(tag => (
                     <button
-                      key={agent}
-                      onClick={() => setFilterAgent(agent)}
-                      className={`dropdown-item w-full ${filterAgent === agent ? 'is-active' : ''}`}
-                    >
-                      {agent}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Filter by Tag */}
-            <div className="dropdown">
-              <div className="dropdown-trigger">
-                <div className="field" style={{ marginBottom: 0 }}>
-                  <div className="control">
-                    <div className="flex items-center gap-2">
-                      <Filter className="w-4 h-4" />
-                      <button className="button w-full">
-                        {filterTag || 'Tag'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="dropdown-menu">
-                <div className="dropdown-content">
-                  <button
-                    onClick={() => setFilterTag('')}
-                    className={`dropdown-item w-full ${!filterTag ? 'is-active' : ''}`}
-                  >
-                    All Tags
-                  </button>
-                  {allTags.map(tag => (
-                    <button
+                      type="button"
                       key={tag}
-                      onClick={() => setFilterTag(tag)}
-                      className={`dropdown-item w-full ${filterTag === tag ? 'is-active' : ''}`}
+                      onClick={() => {
+                        setFilterTag(tag)
+                        setIsTagFilterOpen(false)
+                      }}
+                      className={`block w-full px-3 py-2 text-left text-sm transition-colors ${
+                        filterTag === tag ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+                      }`}
+                      role="menuitem"
                     >
                       {tag}
                     </button>
-                  ))}
-                </div>
+                  ))
+                )}
               </div>
-            </div>
-
-            {/* Clear filters */}
-            {hasActiveFilters && (
-              <button onClick={clearFilters} className="button">
-                <X className="w-3 h-3" />
-                Clear
-              </button>
             )}
-
           </div>
+
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-800 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <X className="w-3 h-3" />
+              Clear
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="terminal-body">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-4 h-full overflow-x-auto">
-            {columns.map(column => (
-              <div key={column.id} className="flex flex-col w-72 h-full">
-                <div className="flex items-center gap-2 mb-3 px-1 shrink-0">
-                  <span className={`w-3 h-3 rounded-full ${column.color}`} />
-                  <h2 className="text-sm font-medium">{column.title}</h2>
-                  <span className="text-xs has-text-muted">
-                    {getTasksByColumn(column.id).length}
-                  </span>
-                </div>
+      {loadError && (
+        <div className="mb-4 rounded-lg border border-red-800 bg-red-950/60 px-4 py-3 text-sm text-red-200">
+          Could not load tasks: {loadError}
+        </div>
+      )}
 
-                <Droppable droppableId={column.id}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`flex-1 p-2 transition-colors overflow-y-auto min-h-0 ${
-                        snapshot.isDraggingOver ? 'has-background-dark' : ''
-                      }`}
-                    >
-                      {getTasksByColumn(column.id).map((task, index) => (
-                        <TaskCard
-                          key={task.id}
-                          task={task}
-                          index={index}
-                          onEdit={openEditTaskModal}
-                          onTrigger={handleTriggerTask}
-                        />
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            ))}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="flex-1 overflow-x-auto">
+          <div className="flex gap-6 min-w-max h-full">
+            {columns.map(column => {
+              const columnTasks = getTasksByColumn(column.id)
+
+              return (
+                <div key={column.id} className="flex flex-col w-[300px]">
+                  <div className={`border-b-2 ${column.color.replace('bg-', 'border-')} pb-2 mb-4`}>
+                    <h2 className="text-lg font-semibold text-white">{column.title}</h2>
+                    <p className="text-xs text-gray-500">{columnTasks.length} tasks</p>
+                  </div>
+
+                  <Droppable droppableId={column.id}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`flex-1 p-2 rounded-lg transition-colors overflow-y-auto max-h-[calc(100vh-200px)] ${
+                          snapshot.isDraggingOver ? 'bg-gray-800/50' : ''
+                        }`}
+                      >
+                        {columnTasks.map((task, index) => (
+                          <TaskCard
+                            key={task.id}
+                            task={task}
+                            index={index}
+                            onEdit={openEditTaskModal}
+                            onTrigger={handleTriggerTask}
+                          />
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </div>
+              )
+            })}
           </div>
-        </DragDropContext>
-      </div>
+        </div>
+      </DragDropContext>
 
       <TaskModal
         isOpen={isModalOpen}

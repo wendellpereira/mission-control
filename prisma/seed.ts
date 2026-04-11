@@ -5,10 +5,7 @@ const prisma = new PrismaClient()
 // Enums as string constants
 const TaskStatus = {
   BACKLOG: 'BACKLOG',
-  READY_FOR_CARTEIRO: 'READY_FOR_CARTEIRO',
   READY_FOR_ZE: 'READY_FOR_ZE',
-  READY_FOR_WELLPROG: 'READY_FOR_WELLPROG',
-  READY_FOR_OCMANAGER: 'READY_FOR_OCMANAGER',
   IN_PROGRESS: 'IN_PROGRESS',
   REVIEW: 'REVIEW',
   APPROVED: 'APPROVED',
@@ -31,7 +28,7 @@ async function main() {
   await prisma.memory.deleteMany()
   await prisma.agent.deleteMany()
 
-  // Create agents
+  // Create the single active OpenClaw agent
   const ze = await prisma.agent.create({
     data: {
       name: 'Ze',
@@ -43,39 +40,6 @@ async function main() {
     },
   })
 
-  const carteiro = await prisma.agent.create({
-    data: {
-      name: 'Carteiro',
-      role: 'Delivery Specialist',
-      description: 'Handles content distribution and publishing',
-      status: 'ACTIVE',
-      lastActive: new Date(Date.now() - 1000 * 60 * 30),
-      specializations: JSON.stringify(['Scheduling', 'Distribution', 'Analytics']),
-    },
-  })
-
-  const wellProg = await prisma.agent.create({
-    data: {
-      name: 'wellProg',
-      role: 'Developer',
-      description: 'Technical implementation and automation expert',
-      status: 'IDLE',
-      lastActive: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      specializations: JSON.stringify(['Code', 'APIs', 'Automation', 'DevOps']),
-    },
-  })
-
-  const ocmanager = await prisma.agent.create({
-    data: {
-      name: 'OCManager',
-      role: 'Operations Manager',
-      description: 'Oversees workflows and team coordination',
-      status: 'ACTIVE',
-      lastActive: new Date(Date.now() - 1000 * 60 * 10),
-      specializations: JSON.stringify(['Project Management', 'Coordination', 'Planning']),
-    },
-  })
-
   // Create tasks
   await prisma.task.createMany({
     data: [
@@ -84,23 +48,20 @@ async function main() {
         description: 'Create a modern, responsive landing page for the new product launch',
         status: TaskStatus.IN_PROGRESS,
         priority: 'HIGH',
-        assignee: 'Ze',
         tags: JSON.stringify(['design', 'web']),
       },
       {
         title: 'Set up CI/CD pipeline',
         description: 'Configure automated testing and deployment',
-        status: TaskStatus.READY_FOR_WELLPROG,
+        status: TaskStatus.READY_FOR_ZE,
         priority: 'MEDIUM',
-        assignee: 'wellProg',
         tags: JSON.stringify(['devops', 'automation']),
       },
       {
         title: 'Review content calendar',
         description: 'Plan content for the next quarter',
-        status: TaskStatus.READY_FOR_OCMANAGER,
+        status: TaskStatus.READY_FOR_ZE,
         priority: 'HIGH',
-        assignee: 'OCManager',
         tags: JSON.stringify(['planning', 'content']),
       },
       {
@@ -108,15 +69,13 @@ async function main() {
         description: 'Create engaging tutorial for new users',
         status: TaskStatus.READY_FOR_ZE,
         priority: 'MEDIUM',
-        assignee: 'Ze',
         tags: JSON.stringify(['content', 'video', 'tutorial']),
       },
       {
         title: 'Publish blog post',
         description: 'Final review and publish the AI trends article',
-        status: TaskStatus.READY_FOR_CARTEIRO,
+        status: TaskStatus.READY_FOR_ZE,
         priority: 'LOW',
-        assignee: 'Carteiro',
         tags: JSON.stringify(['blog', 'publishing']),
       },
       {
@@ -124,7 +83,6 @@ async function main() {
         description: 'Add API reference for new endpoints',
         status: TaskStatus.BACKLOG,
         priority: 'LOW',
-        assignee: 'wellProg',
         tags: JSON.stringify(['docs', 'api']),
       },
       {
@@ -132,7 +90,6 @@ async function main() {
         description: 'Fix issue with social login redirect',
         status: TaskStatus.REVIEW,
         priority: 'URGENT',
-        assignee: 'wellProg',
         tags: JSON.stringify(['bug', 'auth']),
       },
       {
@@ -140,7 +97,6 @@ async function main() {
         description: 'Create assets for summer campaign',
         status: TaskStatus.APPROVED,
         priority: 'MEDIUM',
-        assignee: 'Ze',
         tags: JSON.stringify(['marketing', 'design']),
       },
       {
@@ -148,7 +104,6 @@ async function main() {
         description: 'Improve query performance for dashboard',
         status: TaskStatus.DONE,
         priority: 'HIGH',
-        assignee: 'wellProg',
         tags: JSON.stringify(['database', 'performance']),
       },
     ],
@@ -220,7 +175,7 @@ async function main() {
         date: tomorrow,
         time: '10:00',
         type: 'MEETING',
-        agentId: ocmanager.id,
+        agentId: ze.id,
         color: '#3b82f6',
         recurring: true,
       },
@@ -240,7 +195,7 @@ async function main() {
         date: nextWeek,
         time: '09:00',
         type: 'MEETING',
-        agentId: ocmanager.id,
+        agentId: ze.id,
         color: '#10b981',
         recurring: false,
       },
@@ -250,7 +205,7 @@ async function main() {
         date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
         time: '12:00',
         type: 'DEADLINE',
-        agentId: carteiro.id,
+        agentId: ze.id,
         color: '#ef4444',
         recurring: false,
       },
@@ -260,7 +215,7 @@ async function main() {
         date: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2),
         time: '15:00',
         type: 'MEETING',
-        agentId: wellProg.id,
+        agentId: ze.id,
         color: '#f59e0b',
         recurring: true,
       },
@@ -272,7 +227,7 @@ async function main() {
     data: [
       {
         title: 'Project Goals 2024',
-        content: 'Main objectives for this year:\n1. Launch Mission Control MVP\n2. Grow user base to 10K\n3. Establish content pipeline\n4. Build strong team of AI agents',
+        content: 'Main objectives for this year:\n1. Launch Mission Control MVP\n2. Grow user base to 10K\n3. Establish content pipeline\n4. Keep Ze focused on the active mission queue',
         tags: JSON.stringify(['goals', 'planning', '2024']),
         source: 'Planning Session',
       },
@@ -296,7 +251,7 @@ async function main() {
       },
       {
         title: 'Agent Responsibilities',
-        content: 'Ze: Creative and content\nCarteiro: Distribution and publishing\nwellProg: Technical and automation\nOCManager: Operations and coordination',
+        content: 'Ze is the single active OpenClaw agent for mission work, content, and automation follow-through.',
         tags: JSON.stringify(['team', 'roles', 'agents']),
         source: 'Team Structure',
       },

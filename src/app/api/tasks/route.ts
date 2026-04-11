@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
         description: body.description,
         status: body.status || 'BACKLOG',
         priority: body.priority,
-        assignee: body.assignee,
         tags: body.tags,
       },
     })

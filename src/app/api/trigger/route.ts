@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+const ZE_AGENT_NAME = 'Ze'
+const ZE_AGENT_ID = 'ze'
+
 // POST /api/trigger - Trigger an agent to work on a task
 // This updates the task status. The actual agent execution happens via:
 // 1. Heartbeat polling (agents check for IN_PROGRESS tasks periodically)
@@ -8,10 +11,10 @@ import prisma from '@/lib/prisma'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { taskId, agentId } = body
+    const { taskId } = body
 
-    if (!taskId || !agentId) {
-      return NextResponse.json({ error: 'taskId and agentId are required' }, { status: 400 })
+    if (!taskId) {
+      return NextResponse.json({ error: 'taskId is required' }, { status: 400 })
     }
 
     // Get the task
@@ -29,29 +32,20 @@ export async function POST(request: NextRequest) {
       data: { status: 'IN_PROGRESS' },
     })
 
-    // Build the notification message
-    const agentNames: Record<string, string> = {
-      'ze': 'Ze',
-      'carteiro': 'Carteiro',
-      'wellprog': 'wellProg',
-      'ocmanager': 'OCManager',
-    }
-    
-    const agentName = agentNames[agentId] || agentId
-    const notificationMessage = `🚀 Task triggered!\n\nTask: ${task.title}\nAgent: ${agentName}\nStatus: IN_PROGRESS\n\nTo execute: Send "${agentName}: work on task ${task.id.substring(0, 8)}" to the agent`
+    const notificationMessage = `Task triggered!\n\nTask: ${task.title}\nAgent: ${ZE_AGENT_NAME}\nStatus: IN_PROGRESS\n\nTo execute: Send "${ZE_AGENT_NAME}: work on task ${task.id.substring(0, 8)}" to the agent`
 
     return NextResponse.json({ 
       success: true, 
-      message: `Task moved to IN_PROGRESS. ${agentName} will pick it up on next heartbeat.`,
+      message: `Task moved to IN_PROGRESS. ${ZE_AGENT_NAME} will pick it up on next heartbeat.`,
       task: {
         id: updatedTask.id,
         title: updatedTask.title,
         description: updatedTask.description,
-        assignee: updatedTask.assignee,
         status: updatedTask.status,
       },
+      agentId: ZE_AGENT_ID,
       notification: notificationMessage,
-      nextSteps: `The task is now IN_PROGRESS. ${agentName} will work on it during their next heartbeat check, or you can notify them directly.`
+      nextSteps: `The task is now IN_PROGRESS. ${ZE_AGENT_NAME} will work on it during the next heartbeat check, or you can notify Ze directly.`
     })
   } catch (error) {
     console.error('Failed to trigger agent:', error)

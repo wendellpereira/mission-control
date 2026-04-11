@@ -17,16 +17,10 @@ interface Event {
   updatedAt: Date
 }
 
-interface Agent {
-  id: string
-  name: string
-}
-
 interface EventModalProps {
   isOpen: boolean
   onClose: () => void
   event?: Event | null
-  agents?: Agent[]
   initialDate?: Date
   onSave: (event: Partial<Event>) => void
 }
@@ -50,13 +44,12 @@ const colorOptions = [
   { value: 'orange', label: 'Orange' },
 ]
 
-export default function EventModal({ isOpen, onClose, event, agents = [], initialDate, onSave }: EventModalProps) {
+export default function EventModal({ isOpen, onClose, event, initialDate, onSave }: EventModalProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [type, setType] = useState('')
-  const [agentId, setAgentId] = useState('')
   const [color, setColor] = useState('')
   const [recurring, setRecurring] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -68,7 +61,6 @@ export default function EventModal({ isOpen, onClose, event, agents = [], initia
       setDate(new Date(event.date).toISOString().split('T')[0])
       setTime(event.time || '')
       setType(event.type || '')
-      setAgentId(event.agentId || '')
       setColor(event.color || '')
       setRecurring(event.recurring)
     } else {
@@ -79,7 +71,6 @@ export default function EventModal({ isOpen, onClose, event, agents = [], initia
       setDate(defaultDate.toISOString().split('T')[0])
       setTime('')
       setType('')
-      setAgentId('')
       setColor('')
       setRecurring(false)
     }
@@ -105,7 +96,6 @@ export default function EventModal({ isOpen, onClose, event, agents = [], initia
       date,
       time: time || null,
       type: type || null,
-      agentId: agentId || null,
       color: color || null,
       recurring,
     })
@@ -211,24 +201,6 @@ export default function EventModal({ isOpen, onClose, event, agents = [], initia
               ))}
             </select>
           </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Assign to Agent
-          </label>
-          <select
-            value={agentId}
-            onChange={e => setAgentId(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-          >
-            <option value="">No agent</option>
-            {agents.map(agent => (
-              <option key={agent.id} value={agent.id}>
-                {agent.name}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className="flex items-center gap-2">

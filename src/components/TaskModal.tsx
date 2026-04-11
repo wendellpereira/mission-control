@@ -3,18 +3,7 @@
 import { useState, useEffect } from 'react'
 import Modal from './Modal'
 import { Trash2 } from 'lucide-react'
-
-interface Task {
-  id: string
-  title: string
-  description: string | null
-  status: string
-  priority: string | null
-  assignee: string | null
-  tags: string | null
-  createdAt: Date
-  updatedAt: Date
-}
+import type { Task } from '@/lib/tasks'
 
 interface TaskModalProps {
   isOpen: boolean
@@ -26,10 +15,7 @@ interface TaskModalProps {
 
 const statusOptions = [
   { value: 'BACKLOG', label: 'Backlog' },
-  { value: 'READY_FOR_CARTEIRO', label: 'Ready for Carteiro' },
   { value: 'READY_FOR_ZE', label: 'Ready for Ze' },
-  { value: 'READY_FOR_WELLPROG', label: 'Ready for wellProg' },
-  { value: 'READY_FOR_OCMANAGER', label: 'Ready for OCManager' },
   { value: 'IN_PROGRESS', label: 'In Progress' },
   { value: 'REVIEW', label: 'Review' },
   { value: 'APPROVED', label: 'Approved' },
@@ -44,20 +30,11 @@ const priorityOptions = [
   { value: 'URGENT', label: 'Urgent' },
 ]
 
-const assigneeOptions = [
-  { value: '', label: 'No assignee' },
-  { value: 'Ze', label: 'Ze' },
-  { value: 'Carteiro', label: 'Carteiro' },
-  { value: 'wellProg', label: 'wellProg' },
-  { value: 'OCManager', label: 'OCManager' },
-]
-
 export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: TaskModalProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState('BACKLOG')
   const [priority, setPriority] = useState('')
-  const [assignee, setAssignee] = useState('')
   const [tags, setTags] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -67,7 +44,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
       setDescription(task.description || '')
       setStatus(task.status)
       setPriority(task.priority || '')
-      setAssignee(task.assignee || '')
       // Parse JSON array to space-separated string
       if (task.tags) {
         try {
@@ -84,7 +60,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
       setDescription('')
       setStatus('BACKLOG')
       setPriority('')
-      setAssignee('')
       setTags('')
     }
     setErrors({})
@@ -116,7 +91,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
       description: description.trim() || null,
       status,
       priority: priority || null,
-      assignee: assignee.trim() || null,
       tags: tagsJson,
     })
     onClose()
@@ -176,23 +150,6 @@ export default function TaskModal({ isOpen, onClose, task, onSave, onDelete }: T
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
               >
                 {priorityOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Assignee
-              </label>
-              <select
-                value={assignee}
-                onChange={e => setAssignee(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              >
-                {assigneeOptions.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

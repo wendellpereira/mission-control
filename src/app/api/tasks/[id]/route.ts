@@ -26,9 +26,17 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json()
+    const data: Record<string, unknown> = {}
+
+    if ('title' in body) data.title = body.title
+    if ('description' in body) data.description = body.description
+    if ('priority' in body) data.priority = body.priority
+    if ('tags' in body) data.tags = body.tags
+    if ('status' in body) data.status = body.status
+
     const task = await prisma.task.update({
       where: { id: params.id },
-      data: body,
+      data,
     })
     return NextResponse.json(task)
   } catch (error) {

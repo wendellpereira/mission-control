@@ -7,7 +7,6 @@ import {
   Film, 
   Calendar, 
   Brain, 
-  Users,
   Rocket
 } from 'lucide-react'
 import ThemeSelector from './ThemeSelector'
@@ -17,7 +16,6 @@ const navItems = [
   { href: '/content', label: 'Content', icon: Film },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/memory', label: 'Memory', icon: Brain },
-  { href: '/team', label: 'Team', icon: Users },
 ]
 
 export default function Sidebar() {
